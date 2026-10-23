@@ -1,0 +1,469 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07F56A445B5382A31D8F87A6 /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD9A69E275CF6EC6C8BED880 /* ScreenView.swift */; };
+		0B08B16EE5B1F43E8F6615DF /* DriftglassMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6062732F123BEA6E018CD253 /* DriftglassMac.swift */; };
+		139B864BC293729E8F0030C9 /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C138ECEAC0184596B3684A4 /* InstrumentSerif-Italic.ttf */; };
+		4846703EBA17AB36447F0986 /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28053ECF2453C31F968FC06B /* Wire.swift */; };
+		6A8F029D7CA01760539A2F68 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D414BB31BED718B38E83BB /* Session.swift */; };
+		84D87D23D63D0493FC6F142A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB21BDE1920EB7ACE3CBD8FA /* Assets.xcassets */; };
+		84F152E55E5F439C5CAD7CC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 29E92B04071DB7359E555192 /* Assets.xcassets */; };
+		85B5AA0298790183BA881E1F /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710FDB082BB136D12DBD69B5 /* Input.swift */; };
+		9DBBB4F0C47920DD982CAF48 /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28053ECF2453C31F968FC06B /* Wire.swift */; };
+		BB6FD7E34CA038132A39675E /* Host.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D984F36112606471B954F1B /* Host.swift */; };
+		C065F72C453DB4D179B68548 /* Demo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5692B77EF990A9C3CAB61176 /* Demo.swift */; };
+		FA9A904593DC5D17F38B6BC7 /* DriftglassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745B4CC461540AC8AAEA234F /* DriftglassApp.swift */; };
+		FFCCD03F5E15CCADB86F7C27 /* Streamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBC193F381D5CBBAB9C5DEB /* Streamer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		16A8DBD8295C520CFF6138AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		28053ECF2453C31F968FC06B /* Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wire.swift; sourceTree = "<group>"; };
+		29E92B04071DB7359E555192 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		50C0D690175D087D0B5E8338 /* DriftglassMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DriftglassMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		531DA62D8F1D0A30D3C7A80B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5692B77EF990A9C3CAB61176 /* Demo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Demo.swift; sourceTree = "<group>"; };
+		6062732F123BEA6E018CD253 /* DriftglassMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftglassMac.swift; sourceTree = "<group>"; };
+		6D984F36112606471B954F1B /* Host.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Host.swift; sourceTree = "<group>"; };
+		710FDB082BB136D12DBD69B5 /* Input.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Input.swift; sourceTree = "<group>"; };
+		7173CD001DF051A6D6585759 /* Driftglass.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Driftglass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		745B4CC461540AC8AAEA234F /* DriftglassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftglassApp.swift; sourceTree = "<group>"; };
+		8C138ECEAC0184596B3684A4 /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; };
+		ABBC193F381D5CBBAB9C5DEB /* Streamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streamer.swift; sourceTree = "<group>"; };
+		C0D414BB31BED718B38E83BB /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		CD9A69E275CF6EC6C8BED880 /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
+		FB21BDE1920EB7ACE3CBD8FA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		11EBDEDA2BB79F4917BE718C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7173CD001DF051A6D6585759 /* Driftglass.app */,
+				50C0D690175D087D0B5E8338 /* DriftglassMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		17FCE96A67AE56F8407277F3 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				28053ECF2453C31F968FC06B /* Wire.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		31F89FED3D82B072CBEDFB9B /* Mac */ = {
+			isa = PBXGroup;
+			children = (
+				FB21BDE1920EB7ACE3CBD8FA /* Assets.xcassets */,
+				6062732F123BEA6E018CD253 /* DriftglassMac.swift */,
+				6D984F36112606471B954F1B /* Host.swift */,
+				16A8DBD8295C520CFF6138AB /* Info.plist */,
+				710FDB082BB136D12DBD69B5 /* Input.swift */,
+				ABBC193F381D5CBBAB9C5DEB /* Streamer.swift */,
+			);
+			path = Mac;
+			sourceTree = "<group>";
+		};
+		807F9EBF7C47EA415DA4B426 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8C138ECEAC0184596B3684A4 /* InstrumentSerif-Italic.ttf */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		8841FE2C05D9E8276677F77C = {
+			isa = PBXGroup;
+			children = (
+				AFF3599D4302422316268F51 /* iOS */,
+				31F89FED3D82B072CBEDFB9B /* Mac */,
+				17FCE96A67AE56F8407277F3 /* Shared */,
+				11EBDEDA2BB79F4917BE718C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AFF3599D4302422316268F51 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				29E92B04071DB7359E555192 /* Assets.xcassets */,
+				5692B77EF990A9C3CAB61176 /* Demo.swift */,
+				745B4CC461540AC8AAEA234F /* DriftglassApp.swift */,
+				531DA62D8F1D0A30D3C7A80B /* Info.plist */,
+				CD9A69E275CF6EC6C8BED880 /* ScreenView.swift */,
+				C0D414BB31BED718B38E83BB /* Session.swift */,
+				807F9EBF7C47EA415DA4B426 /* Resources */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		25AA2FC2B438150FB0BA3717 /* DriftglassMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 853F4B92A9FF06AE3C045A9D /* Build configuration list for PBXNativeTarget "DriftglassMac" */;
+			buildPhases = (
+				3802FAF0880FC1C580C11EA6 /* Sources */,
+				47361D327C2FCB18340D6BA2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DriftglassMac;
+			packageProductDependencies = (
+			);
+			productName = DriftglassMac;
+			productReference = 50C0D690175D087D0B5E8338 /* DriftglassMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+		872FAF3A1D5E9FC77AC0B64B /* Driftglass */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9282AAC717B163DAA8F7028E /* Build configuration list for PBXNativeTarget "Driftglass" */;
+			buildPhases = (
+				7E669C0D2698B3E88C881CAA /* Sources */,
+				48049505D1F7B0512790062D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Driftglass;
+			packageProductDependencies = (
+			);
+			productName = Driftglass;
+			productReference = 7173CD001DF051A6D6585759 /* Driftglass.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4FE846BA669A1B9C9239B2DE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					25AA2FC2B438150FB0BA3717 = {
+						DevelopmentTeam = GRFA8BR7C4;
+						ProvisioningStyle = Manual;
+					};
+					872FAF3A1D5E9FC77AC0B64B = {
+						DevelopmentTeam = GRFA8BR7C4;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 9222885FB6DB0FC02B5C90EE /* Build configuration list for PBXProject "Driftglass" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8841FE2C05D9E8276677F77C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 11EBDEDA2BB79F4917BE718C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				872FAF3A1D5E9FC77AC0B64B /* Driftglass */,
+				25AA2FC2B438150FB0BA3717 /* DriftglassMac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		47361D327C2FCB18340D6BA2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84D87D23D63D0493FC6F142A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		48049505D1F7B0512790062D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84F152E55E5F439C5CAD7CC5 /* Assets.xcassets in Resources */,
+				139B864BC293729E8F0030C9 /* InstrumentSerif-Italic.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3802FAF0880FC1C580C11EA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0B08B16EE5B1F43E8F6615DF /* DriftglassMac.swift in Sources */,
+				BB6FD7E34CA038132A39675E /* Host.swift in Sources */,
+				85B5AA0298790183BA881E1F /* Input.swift in Sources */,
+				FFCCD03F5E15CCADB86F7C27 /* Streamer.swift in Sources */,
+				4846703EBA17AB36447F0986 /* Wire.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7E669C0D2698B3E88C881CAA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C065F72C453DB4D179B68548 /* Demo.swift in Sources */,
+				FA9A904593DC5D17F38B6BC7 /* DriftglassApp.swift in Sources */,
+				07F56A445B5382A31D8F87A6 /* ScreenView.swift in Sources */,
+				6A8F029D7CA01760539A2F68 /* Session.swift in Sources */,
+				9DBBB4F0C47920DD982CAF48 /* Wire.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2F1180BB838922CB143933A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaazkhan.driftglass;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3BAC811583C25ED8F564DBCB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaazkhan.driftglass.mac;
+				PRODUCT_NAME = Driftglass;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		3F736558F86B8E662A6B5E59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaazkhan.driftglass;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6AE2DD80F70FB2037890C3FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = GRFA8BR7C4;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C47EBD758F28FBD507D2E656 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = GRFA8BR7C4;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		EA087A44C0C4ACE902450AEF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaazkhan.driftglass.mac;
+				PRODUCT_NAME = Driftglass;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		853F4B92A9FF06AE3C045A9D /* Build configuration list for PBXNativeTarget "DriftglassMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA087A44C0C4ACE902450AEF /* Debug */,
+				3BAC811583C25ED8F564DBCB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9222885FB6DB0FC02B5C90EE /* Build configuration list for PBXProject "Driftglass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6AE2DD80F70FB2037890C3FC /* Debug */,
+				C47EBD758F28FBD507D2E656 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9282AAC717B163DAA8F7028E /* Build configuration list for PBXNativeTarget "Driftglass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3F736558F86B8E662A6B5E59 /* Debug */,
+				2F1180BB838922CB143933A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4FE846BA669A1B9C9239B2DE /* Project object */;
+}
