@@ -224,8 +224,11 @@ final class Host: ObservableObject {
     private func admits(_ s: Source) -> Bool {
         prune()
         if load(s.address) >= Self.maxPerAddress { return false }
+        // A paired address only answers for itself: neighbours on its /64 or elsewhere can't
+        // use up the shared limits to lock it out.
+        if trusted[s.address] != nil { return true }
         if let net = s.network, load(net) >= Self.maxPerNetwork { return false }
-        if trusted[s.address] == nil, allFailures.count + pending.count >= Self.maxGlobal { return false }
+        if allFailures.count + pending.count >= Self.maxGlobal { return false }
         return true
     }
 

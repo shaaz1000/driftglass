@@ -134,7 +134,7 @@ Driftglass can see your screen and click and type for you, so pairing is built t
   whether it was rejected, hung up or timed out (10 seconds), and handshakes still in progress
   count from the moment they arrive, so parallel guesses can't slip past. Limits per minute:
   20 per address, 60 per IPv6 /64 network, 120 overall. An address that has paired successfully
-  is exempt from the overall limit, so a flood from other devices can't lock your phone out, and
+  is held only to its own limit, so a flood from other devices can't lock your phone out, and
   a phone that's already connected keeps working regardless.
 - **Secrets in the Keychain.** The Mac keeps its code in the Keychain. The phone stores only the
   derived key, marked this-device-only so it isn't backed up or synced.
