@@ -31,9 +31,16 @@ final class Host: ObservableObject {
     private var listener: NWListener?
     private var conn: NWConnection?              // the authenticated phone
     private var authenticated = Set<ObjectIdentifier>()
-    // Tracked per source address, so one noisy device can't lock out everyone else.
+    /// Connections still in their handshake, and the source each came from. Any that ends
+    /// without proving the code counts as a failure, however it ends (fail closed).
+    private var pending: [ObjectIdentifier: String] = [:]
+    // Tracked per source, so one noisy device can't lock out everyone else; plus a global
+    // ceiling so many sources together can't guess quickly either. The ceiling also bounds how
+    // many sources are ever tracked at once.
     private var failures: [String: [Date]] = [:]
     private var pausedUntil: [String: Date] = [:]
+    private var allFailures: [Date] = []
+    private var globalPauseUntil = Date.distantPast
 
     // Streamer serialises its own work on a private queue, so any thread may call it.
     nonisolated(unsafe) private let streamer = Streamer()
@@ -46,6 +53,7 @@ final class Host: ObservableObject {
     private static let maxFailures = 20
     private static let failureWindow: TimeInterval = 60
     private static let pause: TimeInterval = 60
+    private static let maxGlobalFailures = 120
     private static let handshakeTimeout: TimeInterval = 10
 
     init() {
@@ -137,31 +145,28 @@ final class Host: ObservableObject {
         // After repeated wrong codes from one address, refuse that address for a while, so
         // online guessing stays slow without letting a stranger lock out your own phone.
         let source = Self.source(of: c)
-        if let until = pausedUntil[source], Date() < until {
+        let now = Date()
+        if now < globalPauseUntil || (pausedUntil[source].map { now < $0 } ?? false) {
             c.cancel()
             return
         }
         let id = ObjectIdentifier(c)
+        pending[id] = source
         c.stateUpdateHandler = { [weak self] s in
             Task { @MainActor in
                 guard let self else { return }
                 switch s {
                 case .ready:
-                    // Only a phone that proved it knows the password may take over.
+                    // Only a phone that proved it knows the code may take over. Its own racing
+                    // attempts (one per network path) were counted as failures; forgive them.
+                    self.pending[id] = nil
+                    self.failures[source] = nil
                     self.authenticated.insert(id)
                     if let old = self.conn, old !== c { self.drop() }
                     self.conn = c
                     let b = CGDisplayBounds(CGMainDisplayID())
                     c.sendJSON(.hello, HostHello(name: self.machineName, width: b.width, height: b.height))
-                case .failed(let error):
-                    // Only a failed TLS handshake is a wrong-code guess; ordinary network drops
-                    // don't count.
-                    if !self.authenticated.contains(id), case .tls = error {
-                        NSLog("Driftglass: rejected a wrong code from \(source)")
-                        self.recordFailure(from: source)
-                    }
-                    self.closed(c)
-                case .cancelled:
+                case .failed, .cancelled:
                     self.closed(c)
                 default: break
                 }
@@ -177,13 +182,22 @@ final class Host: ObservableObject {
     }
 
     private func closed(_ c: NWConnection) {
-        authenticated.remove(ObjectIdentifier(c))
+        let id = ObjectIdentifier(c)
+        if let source = pending.removeValue(forKey: id) { recordFailure(from: source) }
+        authenticated.remove(id)
         if conn === c { drop() }
     }
 
+    /// The key failures are counted under: an IPv4 address, or an IPv6 /64 network (a single
+    /// device can mint any number of addresses inside its /64), without interface suffixes.
     private static func source(of c: NWConnection) -> String {
-        if case let .hostPort(host, _) = c.endpoint { return "\(host)" }
-        return "\(c.endpoint)"
+        guard case let .hostPort(host, _) = c.endpoint else { return "other" }
+        switch host {
+        case .ipv4(let a): return a.rawValue.map(String.init).joined(separator: ".")
+        case .ipv6(let a): return "v6:" + a.rawValue.prefix(8).hex
+        case .name(let n, _): return n
+        @unknown default: return "other"
+        }
     }
 
     private func recordFailure(from source: String) {
@@ -193,10 +207,20 @@ final class Host: ObservableObject {
             return recent.isEmpty ? nil : recent
         }
         pausedUntil = pausedUntil.filter { $0.value > now }
+        allFailures = allFailures.filter { now.timeIntervalSince($0) < Self.failureWindow } + [now]
         failures[source, default: []].append(now)
-        guard failures[source]!.count >= Self.maxFailures else { return }
-        failures[source] = nil
-        pausedUntil[source] = now.addingTimeInterval(Self.pause)
+        if allFailures.count >= Self.maxGlobalFailures {
+            // Many sources guessing together: pause every new handshake. The connected phone,
+            // already authenticated, keeps working.
+            allFailures.removeAll()
+            failures.removeAll()
+            globalPauseUntil = now.addingTimeInterval(Self.pause)
+        } else if failures[source]!.count >= Self.maxFailures {
+            failures[source] = nil
+            pausedUntil[source] = now.addingTimeInterval(Self.pause)
+        } else {
+            return
+        }
         if conn == nil { state = .paused }
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.pause) { [weak self] in
             if self?.state == .paused { self?.state = .waiting }
