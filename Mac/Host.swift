@@ -31,8 +31,9 @@ final class Host: ObservableObject {
     private var listener: NWListener?
     private var conn: NWConnection?              // the authenticated phone
     private var authenticated = Set<ObjectIdentifier>()
-    private var failures: [Date] = []
-    private var pausedUntil = Date.distantPast
+    // Tracked per source address, so one noisy device can't lock out everyone else.
+    private var failures: [String: [Date]] = [:]
+    private var pausedUntil: [String: Date] = [:]
 
     // Streamer serialises its own work on a private queue, so any thread may call it.
     nonisolated(unsafe) private let streamer = Streamer()
@@ -133,8 +134,10 @@ final class Host: ObservableObject {
     }
 
     private func accept(_ c: NWConnection) {
-        // After repeated wrong passwords, refuse everyone for a while: online guessing stays slow.
-        if Date() < pausedUntil {
+        // After repeated wrong codes from one address, refuse that address for a while, so
+        // online guessing stays slow without letting a stranger lock out your own phone.
+        let source = Self.source(of: c)
+        if let until = pausedUntil[source], Date() < until {
             c.cancel()
             return
         }
@@ -150,8 +153,13 @@ final class Host: ObservableObject {
                     self.conn = c
                     let b = CGDisplayBounds(CGMainDisplayID())
                     c.sendJSON(.hello, HostHello(name: self.machineName, width: b.width, height: b.height))
-                case .failed:
-                    if !self.authenticated.contains(id) { self.recordFailure() }
+                case .failed(let error):
+                    // Only a failed TLS handshake is a wrong-code guess; ordinary network drops
+                    // don't count.
+                    if !self.authenticated.contains(id), case .tls = error {
+                        NSLog("Driftglass: rejected a wrong code from \(source)")
+                        self.recordFailure(from: source)
+                    }
                     self.closed(c)
                 case .cancelled:
                     self.closed(c)
@@ -173,12 +181,22 @@ final class Host: ObservableObject {
         if conn === c { drop() }
     }
 
-    private func recordFailure() {
+    private static func source(of c: NWConnection) -> String {
+        if case let .hostPort(host, _) = c.endpoint { return "\(host)" }
+        return "\(c.endpoint)"
+    }
+
+    private func recordFailure(from source: String) {
         let now = Date()
-        failures = failures.filter { now.timeIntervalSince($0) < Self.failureWindow } + [now]
-        guard failures.count >= Self.maxFailures else { return }
-        failures.removeAll()
-        pausedUntil = now.addingTimeInterval(Self.pause)
+        failures = failures.compactMapValues { times in
+            let recent = times.filter { now.timeIntervalSince($0) < Self.failureWindow }
+            return recent.isEmpty ? nil : recent
+        }
+        pausedUntil = pausedUntil.filter { $0.value > now }
+        failures[source, default: []].append(now)
+        guard failures[source]!.count >= Self.maxFailures else { return }
+        failures[source] = nil
+        pausedUntil[source] = now.addingTimeInterval(Self.pause)
         if conn == nil { state = .paused }
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.pause) { [weak self] in
             if self?.state == .paused { self?.state = .waiting }

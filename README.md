@@ -130,8 +130,10 @@ Driftglass can see your screen and click and type for you, so pairing is built t
 - **Pinned Macs.** Each Mac has a permanent ID. The phone remembers the ID and salt it paired with
   and only reconnects to that exact Mac. Another device using the same name shows up as a new,
   unpaired Mac. A rejected handshake never erases a saved pairing.
-- **Rate limiting.** After 20 failed handshakes in a minute (about five wrong tries from a phone),
-  the Mac refuses new connections for a minute. Unauthenticated connections are dropped after
+- **Rate limiting, per device.** After 20 failed handshakes in a minute from one address (about
+  five wrong tries from a phone), the Mac blocks that address for a minute. Other devices,
+  including your own phone, can still connect, so a stranger on the network can't lock you out.
+  Only genuine wrong-code handshakes count. Unauthenticated connections are dropped after
   10 seconds and can't kick off the phone that's already connected.
 - **Secrets in the Keychain.** The Mac keeps its code in the Keychain. The phone stores only the
   derived key, marked this-device-only so it isn't backed up or synced.

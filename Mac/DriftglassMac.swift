@@ -74,7 +74,7 @@ struct Panel: View {
             }
 
             if host.state == .paused {
-                Label("Too many wrong codes. New connections are paused for a minute.", systemImage: "hand.raised")
+                Label("Too many wrong codes from one device. It's blocked for a minute; other devices can still connect.", systemImage: "hand.raised")
                     .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
             }
 
