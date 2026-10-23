@@ -73,22 +73,32 @@ struct Panel: View {
                 statusPill
             }
 
+            if host.state == .paused {
+                Label("Too many wrong codes. New connections are paused for a minute.", systemImage: "hand.raised")
+                    .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+            }
+
             VStack(alignment: .leading, spacing: 6) {
-                Text("PASSWORD").font(.caption2).kerning(1.4).foregroundStyle(.secondary)
+                Text("PAIRING CODE").font(.caption2).kerning(1.4).foregroundStyle(.secondary)
                 if editing {
                     HStack {
-                        TextField("New password", text: $draft).textFieldStyle(.roundedBorder)
+                        TextField("At least 8 characters", text: $draft).textFieldStyle(.roundedBorder)
                             .onSubmit(save)
-                        Button("Save", action: save).disabled(draft.count < 4)
+                        Button("Save", action: save).disabled(!valid)
+                        Button("Cancel") { editing = false }
                     }
                 } else {
                     HStack {
                         Text(host.password).font(.system(.title2, design: .monospaced)).textSelection(.enabled)
                         Spacer()
-                        Button("Change") { draft = host.password; editing = true }
+                        Menu("Change") {
+                            Button("New random code") { host.password = Pairing.newCode() }
+                            Button("Choose my own…") { draft = ""; editing = true }
+                        }
+                        .fixedSize()
                     }
                 }
-                Text("Enter this in Driftglass on your iPhone. Same Wi‑Fi, same password, and it connects.")
+                Text("Enter this in Driftglass on your iPhone, once. Not case-sensitive. Changing it signs out every paired phone.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
 
@@ -110,8 +120,10 @@ struct Panel: View {
         .frame(width: 300)
     }
 
+    private var valid: Bool { Pairing.normalize(draft).count >= 8 }
+
     private func save() {
-        guard draft.count >= 4 else { return }
+        guard valid else { return }
         host.password = draft
         editing = false
     }
@@ -122,6 +134,7 @@ struct Panel: View {
             case .idle: return ("Starting", .secondary)
             case .waiting: return ("Waiting for iPhone", .secondary)
             case .connected(let name): return ("\(name) · \(Int(host.fps)) fps", sea)
+            case .paused: return ("Paused", .orange)
             case .failed(let msg): return (msg, .orange)
             }
         }()

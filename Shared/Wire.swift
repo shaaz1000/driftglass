@@ -4,16 +4,16 @@ import Network
 
 /// The Driftglass wire protocol, shared by the Mac host and the iPhone client.
 ///
-/// One TCP connection, wrapped in TLS with a pre-shared key derived from the password, so a
-/// phone with the wrong password fails the handshake and nothing on the network can read
-/// the stream. Every message is `[type: u8][length: u32 big-endian][payload]`.
+/// One TCP connection, wrapped in TLS with a pre-shared key derived from the password (see
+/// `Pairing.deriveKey`), so a phone with the wrong password fails the handshake and nothing on
+/// the network can read the stream. Every message is `[type: u8][length: u32 big-endian][payload]`.
 enum Wire {
     static let service = "_driftglass._tcp"
 
-    static func parameters(password: String) -> NWParameters {
+    static func parameters(key derived: Data) -> NWParameters {
         let tls = NWProtocolTLS.Options()
-        let key = SymmetricKey(data: Data(password.utf8))
-        let psk = HMAC<SHA256>.authenticationCode(for: Data("driftglass-psk-v1".utf8), using: key)
+        let key = SymmetricKey(data: derived)
+        let psk = HMAC<SHA256>.authenticationCode(for: Data("driftglass-psk-v2".utf8), using: key)
         let pskData = psk.withUnsafeBytes { DispatchData(bytes: $0) }
         let identity = Data("driftglass".utf8).withUnsafeBytes { DispatchData(bytes: $0) }
         let sec = tls.securityProtocolOptions

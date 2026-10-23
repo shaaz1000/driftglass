@@ -47,9 +47,8 @@ struct Root: View {
         }
         .sheet(item: $asking) { mac in
             PasswordSheet(mac: mac, error: passwordError) { pw in
-                Vault.save(pw, for: mac.name)
                 asking = nil
-                connect(mac)
+                pair(mac, password: pw)
             }
             .presentationDetents([.height(330)])
             .presentationBackground(.ultraThinMaterial)
@@ -69,7 +68,7 @@ struct Root: View {
                     VStack(alignment: .leading, spacing: 10) {
                         (Text("Drift") + Text("glass").foregroundColor(sea))
                             .font(serif(64))
-                        Text("Your Mac, in your hand. Same Wi‑Fi, same password.")
+                        Text("Your Mac, in your hand. Same Wi‑Fi, one pairing code.")
                             .font(.callout).foregroundStyle(.secondary)
                     }
                     .padding(.top, 40)
@@ -80,10 +79,10 @@ struct Root: View {
                             Searching()
                         }
                         ForEach(discovery.macs) { mac in
-                            Button { tapped(mac) } label: { MacCard(name: mac.name, remembered: Vault.password(for: mac.name) != nil) }
+                            Button { tapped(mac) } label: { MacCard(name: mac.name, remembered: PairingRecord.usable(mac) != nil) }
                                 .buttonStyle(.plain)
                                 .contextMenu {
-                                    Button("Forget password", role: .destructive) { Vault.forget(mac.name) }
+                                    Button("Forget this Mac", role: .destructive) { PairingRecord.forget(mac) }
                                 }
                         }
                     }
@@ -101,7 +100,7 @@ struct Root: View {
                     .padding(18)
                     .background(Glass())
 
-                    Text("Run Driftglass on your Mac (the waves in the menu bar) and enter the password it shows.")
+                    Text("Run Driftglass on your Mac (the waves in the menu bar) and enter the pairing code it shows.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .padding(.horizontal, 22)
@@ -111,25 +110,43 @@ struct Root: View {
     }
 
     private func tapped(_ mac: Discovery.Mac) {
-        if Vault.password(for: mac.name) == nil {
+        if let record = PairingRecord.usable(mac) {
+            connect(mac, key: record.key)
+        } else {
+            #if DEBUG
+            if let pw = UserDefaults.standard.string(forKey: "dgTestPassword") { pair(mac, password: pw); return }
+            #endif
             passwordError = false
             asking = mac
-        } else {
-            connect(mac)
         }
     }
 
-    private func connect(_ mac: Discovery.Mac) {
-        guard let pw = Vault.password(for: mac.name) else { asking = mac; return }
-        let s = Session(mac: mac, password: pw, bitrate: bitrate)
+    /// First pairing: derive the key with the salt this Mac advertises, and keep it only once
+    /// the Mac has accepted it.
+    private func pair(_ mac: Discovery.Mac, password: String) {
+        guard let salt = mac.salt else {
+            passwordError = true
+            asking = mac
+            return
+        }
+        Task {
+            let key = await Task.detached(priority: .userInitiated) { Pairing.deriveKey(password: password, salt: salt) }.value
+            connect(mac, key: key, onSuccess: { PairingRecord(key: key, salt: salt).save(for: mac) })
+        }
+    }
+
+    private func connect(_ mac: Discovery.Mac, key: Data, onSuccess: (() -> Void)? = nil) {
+        let s = Session(mac: mac, key: key, bitrate: bitrate)
+        s.onAuthenticated = onSuccess
+        // A rejected handshake never erases a saved pairing: a look-alike on the network must
+        // not be able to sign this phone out.
         s.onWrongPassword = { [mac] in
-            Vault.forget(mac.name)
             disconnect(forgetAuto: false)
             passwordError = true
             asking = mac
         }
         session = s
-        lastMac = mac.name
+        lastMac = mac.hostID
         UIApplication.shared.isIdleTimerDisabled = true
         s.start()
     }
@@ -142,9 +159,14 @@ struct Root: View {
     }
 
     private func autoConnect(_ macs: [Discovery.Mac]) {
+        // Only the exact Mac this phone paired with (same ID, same salt), never a name match.
         guard session == nil, asking == nil, phase == .active, !lastMac.isEmpty,
-              let mac = macs.first(where: { $0.name == lastMac }), Vault.password(for: mac.name) != nil else { return }
-        connect(mac)
+              let mac = macs.first(where: { $0.hostID == lastMac }) else { return }
+        #if DEBUG
+        if PairingRecord.usable(mac) == nil, UserDefaults.standard.string(forKey: "dgTestPassword") != nil { tapped(mac); return }
+        #endif
+        guard let record = PairingRecord.usable(mac) else { return }
+        connect(mac, key: record.key)
     }
 }
 
@@ -193,7 +215,7 @@ struct Live: View {
                 ProgressView().tint(sea)
                 Text("Reaching \(session.hostName)…").font(serif(24))
             case .wrongPassword:
-                Text("That password didn't work").font(serif(24))
+                Text("That code didn’t work").font(serif(24))
             case .failed(let msg):
                 Text("Lost the connection").font(serif(26))
                 Text(msg).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -297,7 +319,7 @@ struct MacCard: View {
                 .background(sea.opacity(0.10), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
             VStack(alignment: .leading, spacing: 3) {
                 Text(name).font(.headline)
-                Text(remembered ? "Tap to drift in" : "Needs the password once")
+                Text(remembered ? "Tap to drift in" : "Needs the pairing code once")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             Spacer()
@@ -335,22 +357,22 @@ struct PasswordSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(mac.name).font(serif(32))
-            Text(error ? "That password didn't match. Check the waves icon in your Mac's menu bar."
-                       : "Enter the password shown in Driftglass on your Mac. You only do this once.")
+            Text(error ? "That didn’t match, or your Mac didn’t answer. Check the code in Driftglass on your Mac (the waves in the menu bar)."
+                       : "Enter the pairing code shown in Driftglass on your Mac. You only do this once.")
                 .font(.callout).foregroundStyle(error ? amber : .secondary)
-            SecureField("Password", text: $pw)
+            SecureField("Pairing code", text: $pw)
                 .textContentType(.password)
                 .font(.title3)
                 .padding(14)
                 .background(Glass())
                 .focused($focused)
-                .onSubmit { if pw.count >= 4 { done(pw) } }
+                .onSubmit { if Pairing.normalize(pw).count >= 8 { done(pw) } }
             Button { done(pw) } label: {
                 Text("Connect").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(sea, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .foregroundStyle(ink)
             }
-            .disabled(pw.count < 4)
+            .disabled(Pairing.normalize(pw).count < 8)
         }
         .padding(24)
         .onAppear { focused = true }

@@ -8,8 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		07F56A445B5382A31D8F87A6 /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD9A69E275CF6EC6C8BED880 /* ScreenView.swift */; };
+		0806D841D41D8663D4EBBA46 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9E17A26EEA762F4BC4641 /* Security.swift */; };
 		0B08B16EE5B1F43E8F6615DF /* DriftglassMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6062732F123BEA6E018CD253 /* DriftglassMac.swift */; };
 		139B864BC293729E8F0030C9 /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C138ECEAC0184596B3684A4 /* InstrumentSerif-Italic.ttf */; };
+		42761B33A2BD31335CAE4A55 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9E17A26EEA762F4BC4641 /* Security.swift */; };
+		47127EF23110EF1820DD8D4B /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1261D947FE522B6851DBD2 /* OFL.txt */; };
 		4846703EBA17AB36447F0986 /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28053ECF2453C31F968FC06B /* Wire.swift */; };
 		6A8F029D7CA01760539A2F68 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D414BB31BED718B38E83BB /* Session.swift */; };
 		84D87D23D63D0493FC6F142A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB21BDE1920EB7ACE3CBD8FA /* Assets.xcassets */; };
@@ -26,6 +29,8 @@
 		16A8DBD8295C520CFF6138AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		28053ECF2453C31F968FC06B /* Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wire.swift; sourceTree = "<group>"; };
 		29E92B04071DB7359E555192 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3A1261D947FE522B6851DBD2 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		40A9E17A26EEA762F4BC4641 /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
 		50C0D690175D087D0B5E8338 /* DriftglassMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DriftglassMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		531DA62D8F1D0A30D3C7A80B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5692B77EF990A9C3CAB61176 /* Demo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Demo.swift; sourceTree = "<group>"; };
@@ -54,6 +59,7 @@
 		17FCE96A67AE56F8407277F3 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				40A9E17A26EEA762F4BC4641 /* Security.swift */,
 				28053ECF2453C31F968FC06B /* Wire.swift */,
 			);
 			path = Shared;
@@ -76,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				8C138ECEAC0184596B3684A4 /* InstrumentSerif-Italic.ttf */,
+				3A1261D947FE522B6851DBD2 /* OFL.txt */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -197,6 +204,7 @@
 			files = (
 				84F152E55E5F439C5CAD7CC5 /* Assets.xcassets in Resources */,
 				139B864BC293729E8F0030C9 /* InstrumentSerif-Italic.ttf in Resources */,
+				47127EF23110EF1820DD8D4B /* OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +218,7 @@
 				0B08B16EE5B1F43E8F6615DF /* DriftglassMac.swift in Sources */,
 				BB6FD7E34CA038132A39675E /* Host.swift in Sources */,
 				85B5AA0298790183BA881E1F /* Input.swift in Sources */,
+				0806D841D41D8663D4EBBA46 /* Security.swift in Sources */,
 				FFCCD03F5E15CCADB86F7C27 /* Streamer.swift in Sources */,
 				4846703EBA17AB36447F0986 /* Wire.swift in Sources */,
 			);
@@ -222,6 +231,7 @@
 				C065F72C453DB4D179B68548 /* Demo.swift in Sources */,
 				FA9A904593DC5D17F38B6BC7 /* DriftglassApp.swift in Sources */,
 				07F56A445B5382A31D8F87A6 /* ScreenView.swift in Sources */,
+				42761B33A2BD31335CAE4A55 /* Security.swift in Sources */,
 				6A8F029D7CA01760539A2F68 /* Session.swift in Sources */,
 				9DBBB4F0C47920DD982CAF48 /* Wire.swift in Sources */,
 			);
@@ -255,7 +265,7 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Mac/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -420,7 +430,7 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Mac/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

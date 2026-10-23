@@ -8,7 +8,9 @@ final class Discovery: ObservableObject {
     struct Mac: Identifiable, Hashable {
         var name: String
         var endpoint: NWEndpoint
-        var id: String { name }
+        var hostID: String     // from the Mac's TXT record; what pairings are pinned to
+        var salt: Data?        // the salt the Mac's current key was derived with
+        var id: String { hostID }
     }
 
     @Published var macs: [Mac] = []
@@ -18,11 +20,17 @@ final class Discovery: ObservableObject {
         guard browser == nil else { return }
         let params = NWParameters()
         params.includePeerToPeer = true
-        let b = NWBrowser(for: .bonjour(type: Wire.service, domain: nil), using: params)
+        // The TXT variant is needed to receive each Mac's ID and salt alongside its address.
+        let b = NWBrowser(for: .bonjourWithTXTRecord(type: Wire.service, domain: nil), using: params)
         b.browseResultsChangedHandler = { [weak self] results, _ in
             let macs = results.compactMap { r -> Mac? in
-                if case let .service(name, _, _, _) = r.endpoint { return Mac(name: name, endpoint: r.endpoint) }
-                return nil
+                guard case let .service(name, _, _, _) = r.endpoint else { return nil }
+                var hostID = "name:" + name, salt: Data?
+                if case let .bonjour(txt) = r.metadata {
+                    if let id = txt["id"] { hostID = id }
+                    salt = txt["salt"].flatMap { Data(hex: $0) }
+                }
+                return Mac(name: name, endpoint: r.endpoint, hostID: hostID, salt: salt)
             }.sorted { $0.name < $1.name }
             DispatchQueue.main.async { self?.macs = macs }
         }
@@ -47,6 +55,7 @@ final class Session: ObservableObject {
     @Published private(set) var hostName: String
 
     var onWrongPassword: (() -> Void)?
+    var onAuthenticated: (() -> Void)?
     let layer = AVSampleBufferDisplayLayer()
     private let conn: NWConnection
     private let net = DispatchQueue(label: "driftglass.client", qos: .userInteractive)
@@ -55,10 +64,10 @@ final class Session: ObservableObject {
     private var frameTimes: [CFTimeInterval] = []
     private var keyframeAsked = false
 
-    init(mac: Discovery.Mac, password: String, bitrate: Int) {
+    init(mac: Discovery.Mac, key: Data, bitrate: Int) {
         hostName = mac.name
         self.bitrate = bitrate
-        conn = NWConnection(to: mac.endpoint, using: Wire.parameters(password: password))
+        conn = NWConnection(to: mac.endpoint, using: Wire.parameters(key: key))
         layer.videoGravity = .resize
         layer.preventsDisplaySleepDuringVideoPlayback = true
     }
@@ -66,10 +75,13 @@ final class Session: ObservableObject {
     func start() {
         conn.stateUpdateHandler = { [weak self] s in
             guard let self else { return }
+            #if DEBUG
+            NSLog("Driftglass connection state: \(s)")
+            #endif
             switch s {
             case .ready:
                 self.conn.sendJSON(.clientHello, ClientHello(name: UIDevice.current.name, bitrate: self.bitrate))
-                self.publish { $0.state = .live }
+                self.publish { $0.state = .live; $0.onAuthenticated?() }
             case .waiting(let e), .failed(let e):
                 // A PSK mismatch surfaces as a TLS handshake error.
                 if case .tls = e { self.publish { $0.state = .wrongPassword } }
@@ -80,6 +92,14 @@ final class Session: ObservableObject {
         }
         conn.receiveLoop { [weak self] type, body in self?.received(type, body) }
         conn.start(queue: net)
+        // A wrong code doesn't always surface as an error: the connection keeps retrying other
+        // paths and sits in "preparing". The Mac was just seen on Bonjour, so a handshake that
+        // hasn't finished in a few seconds almost always means the code doesn't match.
+        net.asyncAfter(deadline: .now() + 6) { [weak self] in
+            guard let self, self.conn.state != .ready, self.conn.state != .cancelled else { return }
+            self.conn.cancel()
+            self.publish { $0.state = .wrongPassword }
+        }
     }
 
     func stop() {
@@ -181,34 +201,28 @@ final class Session: ObservableObject {
     }
 }
 
-/// Passwords per Mac, kept in the Keychain.
-enum Vault {
-    private static func query(_ mac: String) -> [String: Any] {
-        [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "driftglass", kSecAttrAccount as String: mac]
+/// What the phone remembers about each paired Mac, in the Keychain (this device only).
+/// It stores the derived key rather than the password, pinned to the Mac's ID and salt.
+struct PairingRecord: Codable {
+    var key: Data
+    var salt: Data
+
+    private static func account(_ hostID: String) -> String { "pair." + hostID }
+
+    static func load(_ mac: Discovery.Mac) -> PairingRecord? {
+        Keychain.data(account(mac.hostID)).flatMap { try? JSONDecoder().decode(PairingRecord.self, from: $0) }
     }
 
-    static func password(for mac: String) -> String? {
-        var q = query(mac)
-        q[kSecReturnData as String] = true
-        var out: CFTypeRef?
-        guard SecItemCopyMatching(q as CFDictionary, &out) == errSecSuccess, let d = out as? Data else {
-            #if DEBUG
-            // Test hook: `-dgTestPassword <pw>` as a launch argument.
-            return UserDefaults.standard.string(forKey: "dgTestPassword")
-            #else
-            return nil
-            #endif
-        }
-        return String(data: d, encoding: .utf8)
+    /// A pairing only counts if the Mac still advertises the salt we paired with. A new salt
+    /// means its code changed (or it isn't the same Mac), so ask again rather than reuse the key.
+    static func usable(_ mac: Discovery.Mac) -> PairingRecord? {
+        guard let r = load(mac), r.salt == mac.salt else { return nil }
+        return r
     }
 
-    static func save(_ password: String, for mac: String) {
-        SecItemDelete(query(mac) as CFDictionary)
-        var q = query(mac)
-        q[kSecValueData as String] = Data(password.utf8)
-        q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        SecItemAdd(q as CFDictionary, nil)
+    func save(for mac: Discovery.Mac) {
+        if let d = try? JSONEncoder().encode(self) { Keychain.set(d, Self.account(mac.hostID)) }
     }
 
-    static func forget(_ mac: String) { SecItemDelete(query(mac) as CFDictionary) }
+    static func forget(_ mac: Discovery.Mac) { Keychain.delete(account(mac.hostID)) }
 }

@@ -3,8 +3,8 @@ import UIKit
 
 /// Debug-only launch flags for capturing screenshots and demo footage in the simulator.
 ///
-///   -dgTestPassword <pw>   use this password for any Mac
-///   -lastMac <name>        auto-connect to this Mac on launch
+///   -dgTestPassword <pw>   pair with any unpaired Mac using this code
+///   -lastMac <hostID>      auto-connect to this Mac on launch (its Bonjour TXT "id")
 ///   -dgSheet YES           open the password sheet for the first Mac found
 ///   -dgLandscape YES       rotate the live view to landscape
 ///   -dgKeyboard YES        bring up the keyboard once connected
