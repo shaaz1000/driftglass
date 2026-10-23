@@ -31,16 +31,17 @@ final class Host: ObservableObject {
     private var listener: NWListener?
     private var conn: NWConnection?              // the authenticated phone
     private var authenticated = Set<ObjectIdentifier>()
-    /// Connections still in their handshake, and the source each came from. Any that ends
-    /// without proving the code counts as a failure, however it ends (fail closed).
-    private var pending: [ObjectIdentifier: String] = [:]
-    // Tracked per source, so one noisy device can't lock out everyone else; plus a global
-    // ceiling so many sources together can't guess quickly either. The ceiling also bounds how
-    // many sources are ever tracked at once.
+    /// Connections still in their handshake, and where each came from. Any that ends without
+    /// proving the code counts as a failure, however it ends (fail closed), and in-flight ones
+    /// count against the limits as soon as they arrive, so parallel guesses can't slip past.
+    private var pending: [ObjectIdentifier: Source] = [:]
+    /// Failure times per key: exact addresses and IPv6 /64 networks.
     private var failures: [String: [Date]] = [:]
-    private var pausedUntil: [String: Date] = [:]
     private var allFailures: [Date] = []
-    private var globalPauseUntil = Date.distantPast
+    /// Addresses that recently proved the code. They're exempt from the global ceiling, so a
+    /// flood from other devices can't lock your own phone out.
+    private var trusted: [String: Date] = [:]
+    private var pauseNotice: DispatchWorkItem?
 
     // Streamer serialises its own work on a private queue, so any thread may call it.
     nonisolated(unsafe) private let streamer = Streamer()
@@ -50,10 +51,11 @@ final class Host: ObservableObject {
     private static let passwordAccount = "host.password"
     // One wrong try from a phone fails several handshakes (it races every interface and IP
     // family), so this allows roughly five tries a minute while keeping guessing far too slow.
-    private static let maxFailures = 20
-    private static let failureWindow: TimeInterval = 60
-    private static let pause: TimeInterval = 60
-    private static let maxGlobalFailures = 120
+    private static let maxPerAddress = 20
+    private static let maxPerNetwork = 60    // per IPv6 /64, shared by every device on it
+    private static let maxGlobal = 120
+    private static let failureWindow: TimeInterval = 60   // a blocked key frees up as failures age out
+    private static let trustFor: TimeInterval = 7 * 24 * 3600
     private static let handshakeTimeout: TimeInterval = 10
 
     init() {
@@ -145,9 +147,9 @@ final class Host: ObservableObject {
         // After repeated wrong codes from one address, refuse that address for a while, so
         // online guessing stays slow without letting a stranger lock out your own phone.
         let source = Self.source(of: c)
-        let now = Date()
-        if now < globalPauseUntil || (pausedUntil[source].map { now < $0 } ?? false) {
+        if !admits(source) {
             c.cancel()
+            showPaused()
             return
         }
         let id = ObjectIdentifier(c)
@@ -160,8 +162,9 @@ final class Host: ObservableObject {
                     // Only a phone that proved it knows the code may take over. Its own racing
                     // attempts (one per network path) were counted as failures; forgive them.
                     self.pending[id] = nil
-                    self.failures[source] = nil
                     self.authenticated.insert(id)
+                    self.trusted[source.address] = Date()
+                    self.forgiveRecent(source.address)
                     if let old = self.conn, old !== c { self.drop() }
                     self.conn = c
                     let b = CGDisplayBounds(CGMainDisplayID())
@@ -188,43 +191,65 @@ final class Host: ObservableObject {
         if conn === c { drop() }
     }
 
-    /// The key failures are counted under: an IPv4 address, or an IPv6 /64 network (a single
-    /// device can mint any number of addresses inside its /64), without interface suffixes.
-    private static func source(of c: NWConnection) -> String {
-        guard case let .hostPort(host, _) = c.endpoint else { return "other" }
+    struct Source {
+        var address: String     // exact IPv4 or IPv6 address, without interface suffix
+        var network: String?    // the IPv6 /64 it belongs to; a device can mint addresses inside it
+    }
+
+    private static func source(of c: NWConnection) -> Source {
+        guard case let .hostPort(host, _) = c.endpoint else { return Source(address: "other") }
         switch host {
-        case .ipv4(let a): return a.rawValue.map(String.init).joined(separator: ".")
-        case .ipv6(let a): return "v6:" + a.rawValue.prefix(8).hex
-        case .name(let n, _): return n
-        @unknown default: return "other"
+        case .ipv4(let a): return Source(address: a.rawValue.map(String.init).joined(separator: "."))
+        case .ipv6(let a): return Source(address: "v6:" + a.rawValue.hex, network: "v6net:" + a.rawValue.prefix(8).hex)
+        case .name(let n, _): return Source(address: n)
+        @unknown default: return Source(address: "other")
         }
     }
 
-    private func recordFailure(from source: String) {
+    private func prune() {
         let now = Date()
         failures = failures.compactMapValues { times in
             let recent = times.filter { now.timeIntervalSince($0) < Self.failureWindow }
             return recent.isEmpty ? nil : recent
         }
-        pausedUntil = pausedUntil.filter { $0.value > now }
-        allFailures = allFailures.filter { now.timeIntervalSince($0) < Self.failureWindow } + [now]
-        failures[source, default: []].append(now)
-        if allFailures.count >= Self.maxGlobalFailures {
-            // Many sources guessing together: pause every new handshake. The connected phone,
-            // already authenticated, keeps working.
-            allFailures.removeAll()
-            failures.removeAll()
-            globalPauseUntil = now.addingTimeInterval(Self.pause)
-        } else if failures[source]!.count >= Self.maxFailures {
-            failures[source] = nil
-            pausedUntil[source] = now.addingTimeInterval(Self.pause)
-        } else {
-            return
-        }
-        if conn == nil { state = .paused }
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.pause) { [weak self] in
-            if self?.state == .paused { self?.state = .waiting }
-        }
+        allFailures = allFailures.filter { now.timeIntervalSince($0) < Self.failureWindow }
+        trusted = trusted.filter { now.timeIntervalSince($0.value) < Self.trustFor }
+    }
+
+    /// Failures in the window plus handshakes still in flight, for one key.
+    private func load(_ key: String) -> Int {
+        (failures[key]?.count ?? 0) + pending.values.filter { $0.address == key || $0.network == key }.count
+    }
+
+    private func admits(_ s: Source) -> Bool {
+        prune()
+        if load(s.address) >= Self.maxPerAddress { return false }
+        if let net = s.network, load(net) >= Self.maxPerNetwork { return false }
+        if trusted[s.address] == nil, allFailures.count + pending.count >= Self.maxGlobal { return false }
+        return true
+    }
+
+    private func recordFailure(from s: Source) {
+        let now = Date()
+        failures[s.address, default: []].append(now)
+        if let net = s.network { failures[net, default: []].append(now) }
+        allFailures.append(now)
+    }
+
+    /// A phone races one handshake per network path; the losers fail just before or after the
+    /// winner. Forgive only this exact address's last few seconds, never a neighbour's.
+    private func forgiveRecent(_ address: String) {
+        let now = Date()
+        failures[address]?.removeAll { now.timeIntervalSince($0) < 5 }
+    }
+
+    private func showPaused() {
+        guard conn == nil else { return }
+        state = .paused
+        pauseNotice?.cancel()
+        let item = DispatchWorkItem { [weak self] in if self?.state == .paused { self?.state = .waiting } }
+        pauseNotice = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.failureWindow, execute: item)
     }
 
     /// Called on the network queue; input is posted straight from here to keep latency down.

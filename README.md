@@ -131,12 +131,11 @@ Driftglass can see your screen and click and type for you, so pairing is built t
   and only reconnects to that exact Mac. Another device using the same name shows up as a new,
   unpaired Mac. A rejected handshake never erases a saved pairing.
 - **Rate limiting.** Any connection that ends without proving the code counts as a failure,
-  whether it was rejected, hung up or timed out (10 seconds). After 20 failures in a minute from
-  one device (an IPv4 address, or an IPv6 /64 network), that device is blocked for a minute while
-  others, including your phone, can still connect. A global ceiling of 120 failures a minute
-  pauses all new attempts, so many devices together can't guess quickly either. A phone that's
-  already connected keeps working through any pause, and an unauthenticated connection can't kick
-  it off.
+  whether it was rejected, hung up or timed out (10 seconds), and handshakes still in progress
+  count from the moment they arrive, so parallel guesses can't slip past. Limits per minute:
+  20 per address, 60 per IPv6 /64 network, 120 overall. An address that has paired successfully
+  is exempt from the overall limit, so a flood from other devices can't lock your phone out, and
+  a phone that's already connected keeps working regardless.
 - **Secrets in the Keychain.** The Mac keeps its code in the Keychain. The phone stores only the
   derived key, marked this-device-only so it isn't backed up or synced.
 - **Hardened Runtime** is on for the Mac app, so other software can't inject code into it and
